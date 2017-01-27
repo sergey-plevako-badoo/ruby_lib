@@ -1,3 +1,4 @@
+# rake ios[common/element/window]
 describe 'common/element/window' do
   def before_first
     screen.must_equal catalog
@@ -7,6 +8,7 @@ describe 'common/element/window' do
     before_first
   end
 
+  # rubocop:disable Lint/UnifiedInteger
   t 'window_size' do
     size = window_size
     size.width.class.must_equal Fixnum

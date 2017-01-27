@@ -94,7 +94,7 @@ def tag_exists tag_name
 end
 
 # Inspired by Gollum's Rakefile
-desc 'Build and release a new gem to rubygems.org'
+desc 'Generate release note and create a release branch'
 task :release => :gem do
   unless `git branch`.include? '* master'
     puts 'Master branch required to release.'
@@ -108,22 +108,34 @@ task :release => :gem do
   tag_name = "v#{version}"
   raise 'Tag already exists!' if tag_exists tag_name
 
-  # Commit then pull before pushing.
+  branch_name = "release_#{version.gsub('.', '_')}"
+  sh "git checkout -b #{branch_name}"
+
   sh "git commit --allow-empty -am 'Release #{version}'"
-  sh 'git pull'
-  sh "git tag #{tag_name}"
+
   # update notes now that there's a new tag
   Rake::Task['notes'].execute
   Rake::Task['docs'].execute
   sh "git commit --allow-empty -am 'Update release notes'"
-  sh 'git push origin master'
-  sh "git push origin #{tag_name}"
-  gem_build
-  sh "gem push #{repo_name}-#{version}.gem"
+
+  puts "Please git push #{branch_name} and send PR, merge it."
 end
 
-desc 'Build and release a new gem to rubygems.org (same as release)'
-task :publish => :release do
+desc 'Build and release a new gem to rubygems.org'
+task :publish do
+  unless `git branch`.include? '* master'
+    puts 'Master branch required to release.'
+    exit!
+  end
+
+  sh 'git pull'
+
+  tag_name = "v#{version}"
+  sh "git tag #{tag_name}"
+  sh "git push origin #{tag_name}"
+
+  gem_build
+  sh "gem push #{repo_name}-#{version}.gem"
 end
 
 def gem_build
@@ -147,6 +159,7 @@ task :uninstall do
   begin
     sh "#{cmd}"
   rescue
+    # ignored
   end
 end
 
@@ -157,7 +170,7 @@ end
 
 desc 'Update android and iOS docs'
 task :docs do
-  sh "ruby docs_gen/make_docs.rb"
+  sh 'ruby docs_gen/make_docs.rb'
 end
 
 desc 'Update release notes'

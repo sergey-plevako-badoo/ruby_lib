@@ -1,50 +1,76 @@
-# UIAStaticText methods
+# UIAStaticText|XCUIElementTypeStaticText methods
 module Appium
   module Ios
-    UIAStaticText = 'UIAStaticText'
+    UIAStaticText = 'UIAStaticText'.freeze
+    XCUIElementTypeStaticText = 'XCUIElementTypeStaticText'.freeze
 
-    # Find the first UIAStaticText that contains value or by index.
+    # @return [String] Class name for text
+    def static_text_class
+      automation_name_is_xcuitest? ? XCUIElementTypeStaticText : UIAStaticText
+    end
+
+    # Find the first UIAStaticText|XCUIElementTypeStaticText that contains value or by index.
     # @param value [String, Integer] the value to find.
-    # If int then the UIAStaticText at that index is returned.
-    # @return [UIAStaticText]
+    # If int then the UIAStaticText|XCUIElementTypeStaticText at that index is returned.
+    # @return [UIAStaticText|XCUIElementTypeStaticText]
     def text(value)
-      return ele_index UIAStaticText, value if value.is_a? Numeric
-      ele_by_json_visible_contains UIAStaticText, value
+      return ele_index static_text_class, value if value.is_a? Numeric
+
+      if automation_name_is_xcuitest?
+        raise_error_if_no_element texts(value).first
+      else
+        ele_by_json_visible_contains static_text_class, value
+      end
     end
 
-    # Find all UIAStaticText containing value.
-    # If value is omitted, all UIAStaticTexts are returned
+    # Find all UIAStaticTexts|XCUIElementTypeStaticTexts containing value.
+    # If value is omitted, all UIAStaticTexts|XCUIElementTypeStaticTexts are returned
     # @param value [String] the value to search for
-    # @return [Array<UIAStaticText>]
+    # @return [Array<UIAStaticText|XCUIElementTypeStaticText>]
     def texts(value = false)
-      return tags UIAStaticText unless value
-      eles_by_json_visible_contains UIAStaticText, value
+      return tags static_text_class unless value
+
+      if automation_name_is_xcuitest?
+        visible_elements = tags static_text_class
+        elements_include visible_elements, value
+      else
+        eles_by_json_visible_contains static_text_class, value
+      end
     end
 
-    # Find the first UIAStaticText.
-    # @return [UIAStaticText]
+    # Find the first UIAStaticText|XCUIElementTypeStaticText.
+    # @return [UIAStaticText|XCUIElementTypeStaticText]
     def first_text
-      first_ele UIAStaticText
+      first_ele static_text_class
     end
 
-    # Find the last UIAStaticText.
-    # @return [UIAStaticText]
+    # Find the last UIAStaticText|XCUIElementTypeStaticText.
+    # @return [UIAStaticText|XCUIElementTypeStaticText]
     def last_text
-      last_ele UIAStaticText
+      last_ele static_text_class
     end
 
-    # Find the first UIAStaticText that exactly matches value.
+    # Find the first UIAStaticText|XCUIElementTypeStaticText that exactly matches value.
     # @param value [String] the value to match exactly
-    # @return [UIAStaticText]
+    # @return [UIAStaticText|XCUIElementTypeStaticText]
     def text_exact(value)
-      ele_by_json_visible_exact UIAStaticText, value
+      if automation_name_is_xcuitest?
+        raise_error_if_no_element texts_exact(value).first
+      else
+        ele_by_json_visible_exact static_text_class, value
+      end
     end
 
-    # Find all UIAStaticTexts that exactly match value.
+    # Find all UIAStaticTexts|XCUIElementTypeStaticTexts that exactly match value.
     # @param value [String] the value to match exactly
-    # @return [Array<UIAStaticText>]
+    # @return [Array<UIAStaticText|XCUIElementTypeStaticText>]
     def texts_exact(value)
-      eles_by_json_visible_exact UIAStaticText, value
+      if automation_name_is_xcuitest?
+        visible_elements = tags static_text_class
+        elements_exact visible_elements, value
+      else
+        eles_by_json_visible_exact static_text_class, value
+      end
     end
   end # module Ios
 end # module Appium

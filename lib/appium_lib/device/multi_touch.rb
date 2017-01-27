@@ -8,7 +8,7 @@ module Appium
   #
   # ```ruby
   # action_1 = TouchAction.new.press(x: 45, y: 100).wait(5).release
-  # action_2 = TouchAction.new.tap(element: el, x: 50, y:5, count: 3).release
+  # action_2 = TouchAction.new.tap(element: el, x: 50, y:5, count: 3)
   #
   # multi_touch_action = MultiTouch.new
   # multi_touch_action.add action_1
@@ -26,16 +26,17 @@ module Appium
       # action.perform    #=> to 25% of its size.
       # ```
       def pinch(percentage = 25, auto_perform = true)
-        fail ArgumentError("Can't pinch to greater than screen size.") if percentage > 100
+        raise ArgumentError("Can't pinch to greater than screen size.") if percentage > 100
 
-        p = Float(percentage) / 100
-        i = 1 - p
+        rate = Float(percentage) / 100
 
-        top = TouchAction.new
-        top.swipe start_x: 1.0, start_y: 0.0, end_x: i, end_y: i, duration: 1
-
-        bottom = TouchAction.new
-        bottom.swipe(start_x: 0.0, start_y: 1.0, end_x: p, end_y: p, duration: 1)
+        if $driver.automation_name_is_xcuitest?
+          top, bottom = pinch_for_xcuitest(rate)
+        elsif $driver.device_is_android?
+          top, bottom = pinch_android(rate)
+        else
+          top, bottom = pinch_ios(rate)
+        end
 
         pinch = MultiTouch.new
         pinch.add top
@@ -54,16 +55,17 @@ module Appium
       # action.perform
       # ```
       def zoom(percentage = 200, auto_perform = true)
-        fail ArgumentError("Can't zoom to smaller then screen size.") if percentage < 100
+        raise ArgumentError("Can't zoom to smaller then screen size.") if percentage < 100
 
-        p = 100 / Float(percentage)
-        i = 1 - p
+        rate = 100 / Float(percentage)
 
-        top = TouchAction.new
-        top.swipe start_x: i, start_y: i, end_x: 1, end_y: 1, duration: 1
-
-        bottom = TouchAction.new
-        bottom.swipe start_x: p, start_y: p, end_x: 1, end_y: 1, duration: 1
+        if $driver.automation_name_is_xcuitest?
+          top, bottom = zoom_for_xcuitest(rate)
+        elsif $driver.device_is_android?
+          top, bottom = zoom_android(rate)
+        else
+          top, bottom = zoom_ios(rate)
+        end
 
         zoom = MultiTouch.new
         zoom.add top
@@ -71,7 +73,95 @@ module Appium
         return zoom unless auto_perform
         zoom.perform
       end
-    end
+
+      private
+
+      def pinch_for_xcuitest(rate)
+        height = 100
+
+        ele = $driver.find_element :class, 'XCUIElementTypeApplication'
+        top = TouchAction.new
+        top.swipe({ start_x: 0.5, start_y: 0.0,
+                    offset_x: 0.0, offset_y: (1 - rate) * height }, ele)
+
+        bottom = TouchAction.new
+        bottom.swipe({ start_x: 0.5, start_y: 1.0,
+                       offset_x: 0.0, offset_y: rate * height }, ele)
+
+        [top, bottom]
+      end
+
+      def pinch_android(rate)
+        height = 100
+
+        top = TouchAction.new
+        top.swipe start_x: 0.5, start_y: 1.0 * height,
+                  end_x: 0.5, end_y: rate * height, duration: 1_000
+
+        bottom = TouchAction.new
+        bottom.swipe start_x: 0.5, start_y: 0.0,
+                     end_x: 0.5, end_y: (1 - rate) * height, duration: 1_000
+
+        [top, bottom]
+      end
+
+      def pinch_ios(rate)
+        height = 100
+
+        top = TouchAction.new
+        top.swipe start_x: 0.5, start_y: 0.0,
+                  offset_x: 0.0, offset_y: (1 - rate) * height, duration: 1_000
+
+        bottom = TouchAction.new
+        bottom.swipe start_x: 0.5, start_y: 1.0,
+                     offset_x: 0.0, offset_y: rate * height, duration: 1_000
+
+        [top, bottom]
+      end
+
+      def zoom_for_xcuitest(rate)
+        height = 100
+
+        ele = $driver.find_element :class, 'XCUIElementTypeApplication'
+        top = TouchAction.new
+        top.swipe({ start_x: 0.5, start_y: (1 - rate) * height,
+                    offset_x: 0.0, offset_y: - (1 - rate) * height }, ele)
+
+        bottom = TouchAction.new
+        bottom.swipe({ start_x: 0.5, start_y: rate * height,
+                       offset_x: 0.0, offset_y: (1 - rate) * height }, ele)
+
+        [top, bottom]
+      end
+
+      def zoom_android(rate)
+        height = 100
+
+        top = TouchAction.new
+        top.swipe start_x: 0.5, start_y: (1.0 - rate) * height,
+                  end_x: 0.5, end_y: 0.0, duration: 1_000
+
+        bottom = TouchAction.new
+        bottom.swipe start_x: 0.5, start_y: rate * height,
+                     end_x: 0.5, end_y: 1.0 * height, duration: 1_000
+
+        [top, bottom]
+      end
+
+      def zoom_ios(rate)
+        height = 100
+
+        top = TouchAction.new
+        top.swipe start_x: 0.5, start_y: (1 - rate) * height,
+                  offset_x: 0.0, offset_y: - (1 - rate) * height, duration: 1_000
+
+        bottom = TouchAction.new
+        bottom.swipe start_x: 0.5, start_y: rate * height,
+                     offset_x: 0.0, offset_y: (1 - rate) * height, duration: 1_000
+
+        [top, bottom]
+      end
+    end # self
 
     # Create a new multi-action
     def initialize

@@ -4,24 +4,6 @@ module Appium
   module Device
     extend Forwardable
 
-    NoArgMethods = {
-      post: {
-        open_notifications:   'session/:session_id/appium/device/open_notifications',
-        shake:                'session/:session_id/appium/device/shake',
-        launch_app:           'session/:session_id/appium/app/launch',
-        close_app:            'session/:session_id/appium/app/close',
-        reset:                'session/:session_id/appium/app/reset',
-        toggle_airplane_mode: 'session/:session_id/appium/device/toggle_airplane_mode',
-        device_locked?:       'session/:session_id/appium/device/is_locked'
-      },
-      get:  {
-        device_time:            'session/:session_id/appium/device/system_time',
-        current_activity:       'session/:session_id/appium/device/current_activity',
-        current_context:        'session/:session_id/context',
-        get_network_connection: 'session/:session_id/network_connection'
-      }
-    }
-
     # @!method app_strings
     #   Return the hash of all localization strings.
     #   ```ruby
@@ -51,7 +33,7 @@ module Appium
 
     # @!method hide_keyboard
     #   Hide the onscreen keyboard
-    #   @param close_key (String) the name of the key which closes the keyboard.
+    #   @param [String] close_key The name of the key which closes the keyboard.
     #     Defaults to 'Done'.
     #  ```ruby
     #  hide_keyboard # Close a keyboard with the 'Done' button
@@ -61,24 +43,24 @@ module Appium
     # @!method press_keycode
     # Press keycode on the device.
     # http://developer.android.com/reference/android/view/KeyEvent.html
-    # @param key (integer) The key to press.
-    # @param metastate (String) The state the metakeys should be in when pressing the key.
+    # @param [integer] key The key to press.
+    # @param [String] metastate The state the metakeys should be in when pressing the key.
 
     # @!method long_press_keycode
     # Long press keycode on the device.
     # http://developer.android.com/reference/android/view/KeyEvent.html
-    # @param key (integer) The key to long press.
-    # @param metastate (String) The state the metakeys should be in when long pressing the key.
+    # @param [integer] key The key to long press.
+    # @param [String] metastate The state the metakeys should be in when long pressing the key.
 
     # @!method push_file
     #   Place a file in a specific location on the device.
-    #   @param path (String) The absolute path on the device to store data at.
-    #   @param data (String) Raw file data to be sent to the device.
+    #   @param [String] path The absolute path on the device to store data at.
+    #   @param [String] data Raw file data to be sent to the device.
 
     # @!method pull_file
     #   Retrieve a file from the device.  This can retrieve an absolute path or
     #   a path relative to the installed app (iOS only).
-    #   @param path (String) Either an absolute path OR, for iOS devices, a path relative to the app, as described.
+    #   @param [String] path Either an absolute path OR, for iOS devices, a path relative to the app, as described.
     #
     #   ```ruby
     #   pull_file '/local/data/some/path' #=> Get the file at that path
@@ -87,100 +69,136 @@ module Appium
 
     # @!method pull_folder
     #   Retrieve a folder from the device.
-    #   @param path (String) absolute path to the folder
+    #   @param [String] path absolute path to the folder
     #
     #   ```ruby
     #   pull_folder '/data/local/tmp' #=> Get the folder at that path
     #   ```
 
+    # @!method touch_id
+    #   iOS only;  Simulate Touch ID with either valid (match == true) or invalid (match == false) fingerprint.
+    #   @param [Boolean] match fingerprint validity
+    #     Defaults to true.
+    #   ```ruby
+    #   touch_id true #=> Simulate valid fingerprint
+    #   touch_id false #=> Simulate invalid fingerprint
+    #   ```
+
     # @!method end_coverage
     #   Android only;  Ends the test coverage and writes the results to the given path on device.
-    #   @param path (String) Path on the device to write too.
-    #   @param intent (String) Intent to broadcast when ending coverage.
+    #   @param [String] path Path on the device to write too.
+    #   @param [String] intent Intent to broadcast when ending coverage.
 
     # @!method get_settings
     #   Get appium Settings for current test session
 
     # @!method update_settings
     #   Update appium Settings for current test session
-    #   @param settings (hash) Settings to update, keys are settings, values to value to set each setting to
+    #   @param [Hash] settings Settings to update, keys are settings, values to value to set each setting to
+
+    # @!method start_activity
+    #   Start a new activity within the current app or launch a new app and start the target activity.
+    #
+    #   Android only.
+    #   @option [String] The package owning the activity [required]
+    #   @option [String] The target activity [required]
+    #   @option opts [String] The package to start before the target package [optional]
+    #   @option opts [String] The activity to start before the target activity [optional]
+    #
+    #   ```ruby
+    #   start_activity app_package: 'io.appium.android.apis',
+    #     app_activity: '.accessibility.AccessibilityNodeProviderActivity'
+    #   ```
+
+    # @!method get_network_connection
+    #   Get the device network connection current status
+    #   See set_network_connection method for return value
+
+    # @!method set_network_connection
+    #   Set the device network connection mode
+    #   @param [String] path Bit mask that represent the network mode
+    #
+    #   Value (Alias)      | Data | Wifi | Airplane Mode
+    #   -------------------------------------------------
+    #   1 (Airplane Mode)  | 0    | 0    | 1
+    #   6 (All network on) | 1    | 1    | 0
+    #   4 (Data only)      | 1    | 0    | 0
+    #   2 (Wifi only)      | 0    | 1    | 0
+    #   0 (None)           | 0    | 0    | 0
+    #
+
+    # @!method set_immediate_value
+    #   Set the value to element directly
+    #   for iOS; setValue is called in XCUITest instead because XCUITest doesn't provide set value directly.
+    #   https://github.com/appium/appium-xcuitest-driver/blob/793cdc7d5e84bd553e375076e1c6dc7e242c9cde/lib/commands/element.js#L123
+    #
+    #   ```ruby
+    #   set_immediate_value element, 'hello'
+    #   ```
     class << self
       def extended(_mod)
         extend_webdriver_with_forwardable
 
-        NoArgMethods.each_pair do |verb, pair|
-          pair.each_pair { |command, path| add_endpoint_method command, path, verb }
+        ::Appium::Driver::Commands::COMMAND_NO_ARG.each_key do |method|
+          add_endpoint_method method
         end
 
-        add_endpoint_method(:available_contexts, 'session/:session_id/contexts', :get) do
+        add_endpoint_method(:available_contexts) do
           def available_contexts
             # return empty array instead of nil on failure
             execute(:available_contexts, {}) || []
           end
         end
 
-        add_endpoint_method(:app_strings, 'session/:session_id/appium/app/strings') do
+        add_endpoint_method(:app_strings) do
           def app_strings(language = nil)
             opts = language ? { language: language } : {}
             execute :app_strings, {}, opts
           end
         end
 
-        add_endpoint_method(:lock, 'session/:session_id/appium/device/lock') do
+        add_endpoint_method(:lock) do
           def lock(duration)
             execute :lock, {}, seconds: duration
           end
         end
 
-        add_endpoint_method(:install_app, 'session/:session_id/appium/device/install_app') do
+        add_endpoint_method(:install_app) do
           def install_app(path)
             execute :install_app, {}, appPath: path
           end
         end
 
-        add_endpoint_method(:remove_app, 'session/:session_id/appium/device/remove_app') do
+        add_endpoint_method(:remove_app) do
           def remove_app(id)
             execute :remove_app, {}, appId: id
           end
         end
 
-        add_endpoint_method(:app_installed?, 'session/:session_id/appium/device/app_installed') do
+        add_endpoint_method(:app_installed?) do
           def app_installed?(app_id)
             execute :app_installed?, {}, bundleId: app_id
           end
         end
 
-        add_endpoint_method(:background_app, 'session/:session_id/appium/app/background') do
+        add_endpoint_method(:background_app) do
           def background_app(duration)
             execute :background_app, {}, seconds: duration
           end
         end
 
-        # @!method start_activity
-        #   Start a new activity within the current app or launch a new app and start the target activity.
-        #
-        #   Android only.
-        #   @param [String] The package owning the activity [required]
-        #   @param [String] The target activity [required]
-        #   @param [String] The package to start before the target package [optional]
-        #   @param [String] The activity to start before the target activity [optional]
-        #
-        #   ```ruby
-        #   start_activity app_package: 'io.appium.android.apis',
-        #     app_activity: '.accessibility.AccessibilityNodeProviderActivity'
-        #   ```
-        add_endpoint_method(:start_activity, 'session/:session_id/appium/device/start_activity') do
+        add_endpoint_method(:start_activity) do
           def start_activity(opts)
-            fail 'opts must be a hash' unless opts.is_a? Hash
+            raise 'opts must be a hash' unless opts.is_a? Hash
             app_package = opts[:app_package]
-            fail 'app_package is required' unless app_package
+            raise 'app_package is required' unless app_package
             app_activity = opts[:app_activity]
-            fail 'app_activity is required' unless opts[:app_activity]
+            raise 'app_activity is required' unless app_activity
             app_wait_package  = opts.fetch(:app_wait_package, '')
             app_wait_activity = opts.fetch(:app_wait_activity, '')
 
             unknown_opts = opts.keys - [:app_package, :app_activity, :app_wait_package, :app_wait_activity]
-            fail "Unknown options #{unknown_opts}" unless unknown_opts.empty?
+            raise "Unknown options #{unknown_opts}" unless unknown_opts.empty?
 
             execute :start_activity, {}, appPackage: app_package,
                                          appActivity: app_activity,
@@ -189,13 +207,13 @@ module Appium
           end
         end
 
-        add_endpoint_method(:set_context, 'session/:session_id/context') do
+        add_endpoint_method(:set_context) do
           def set_context(context = null)
             execute :set_context, {}, name: context
           end
         end
 
-        add_endpoint_method(:hide_keyboard, 'session/:session_id/appium/device/hide_keyboard') do
+        add_endpoint_method(:hide_keyboard) do
           def hide_keyboard(close_key = nil)
             # Android can only tapOutside.
             if $driver.device_is_android?
@@ -203,11 +221,17 @@ module Appium
             end
 
             close_key ||= 'Done' # default to Done key.
-            $driver.hide_ios_keyboard close_key
+            if $driver.automation_name_is_xcuitest?
+              # strategy is not implemented in the following
+              # https://github.com/appium/appium-xcuitest-driver/blob/v2.2.0/lib/commands/general.js#L51
+              execute :hide_keyboard, {}, strategy: :grouped, key: close_key
+            else
+              $driver.hide_ios_keyboard close_key
+            end
           end
         end
 
-        add_endpoint_method(:press_keycode, 'session/:session_id/appium/device/press_keycode') do
+        add_endpoint_method(:press_keycode) do
           def press_keycode(key, metastate = nil)
             args             = { keycode: key }
             args[:metastate] = metastate if metastate
@@ -215,7 +239,7 @@ module Appium
           end
         end
 
-        add_endpoint_method(:long_press_keycode, 'session/:session_id/appium/device/long_press_keycode') do
+        add_endpoint_method(:long_press_keycode) do
           def long_press_keycode(key, metastate = nil)
             args             = { keycode: key }
             args[:metastate] = metastate if metastate
@@ -223,21 +247,21 @@ module Appium
           end
         end
 
-        # TODO: TEST ME
-        add_endpoint_method(:set_immediate_value, 'session/:session_id/appium/element/:id/value') do
-          def set_immediate_value(element, value)
-            execute :set_immediate_value, { id: element.ref }, value: value
+        add_endpoint_method(:set_immediate_value) do
+          def set_immediate_value(element, *value)
+            keys = ::Selenium::WebDriver::Keys.encode(value)
+            execute :set_immediate_value, { id: element.ref }, value: Array(keys)
           end
         end
 
-        add_endpoint_method(:push_file, 'session/:session_id/appium/device/push_file') do
+        add_endpoint_method(:push_file) do
           def push_file(path, filedata)
             encoded_data = Base64.encode64 filedata
             execute :push_file, {}, path: path, data: encoded_data
           end
         end
 
-        add_endpoint_method(:pull_file, 'session/:session_id/appium/device/pull_file') do
+        add_endpoint_method(:pull_file) do
           def pull_file(path)
             data = execute :pull_file, {}, path: path
             Base64.decode64 data
@@ -245,7 +269,7 @@ module Appium
         end
 
         # TODO: TEST ME
-        add_endpoint_method(:pull_folder, 'session/:session_id/appium/device/pull_folder') do
+        add_endpoint_method(:pull_folder) do
           def pull_folder(path)
             data = execute :pull_folder, {}, path: path
             Base64.decode64 data
@@ -253,60 +277,47 @@ module Appium
         end
 
         # TODO: TEST ME
-        add_endpoint_method(:end_coverage, 'session/:session_id/appium/app/end_test_coverage') do
+        add_endpoint_method(:touch_id) do
+          def touch_id(match = true)
+            execute :touch_id, {}, match: match
+          end
+        end
+
+        # TODO: TEST ME
+        add_endpoint_method(:end_coverage) do
           def end_coverage(path, intent)
             execute :end_coverage, {}, path: path, intent: intent
           end
         end
 
-        add_endpoint_method(:get_settings, 'session/:session_id/appium/settings', :get) do
+        add_endpoint_method(:get_settings) do
           def get_settings
             execute :get_settings, {}
           end
         end
 
-        add_endpoint_method(:update_settings, 'session/:session_id/appium/settings') do
+        add_endpoint_method(:update_settings) do
           def update_settings(settings)
             execute :update_settings, {}, settings: settings
           end
         end
 
-        # @!method get_network_connection
-        #   Get the device network connection current status
-        #   See set_network_connection method for return value
-
-        # @!method set_network_connection
-        #   Set the device network connection mode
-        #   @param path (String) Bit mask that represent the network mode
-        #   Value (Alias)      | Data | Wifi | Airplane Mode
-        #   -------------------------------------------------
-        #   1 (Airplane Mode)  | 0    | 0    | 1
-        #   6 (All network on) | 1    | 1    | 0
-        #   4 (Data only)      | 1    | 0    | 0
-        #   2 (Wifi only)      | 0    | 1    | 0
-        #   0 (None)           | 0    | 0    | 0
-        #
-        add_endpoint_method(:set_network_connection, 'session/:session_id/network_connection') do
+        add_endpoint_method(:set_network_connection) do
           def set_network_connection(mode)
             execute :set_network_connection, {}, type: mode
           end
         end
 
         add_touch_actions
+        add_ime_actions
         extend_search_contexts
       end
 
       # def extended
 
       # @private
-      def add_endpoint_method(method, path, verb = :post)
-        if block_given?
-          # &Proc.new with no args passes the passed_in block
-          # Because creating Procs from blocks is slow
-          create_bridge_command method, verb, path, &Proc.new
-        else
-          create_bridge_command method, verb, path
-        end
+      def add_endpoint_method(method)
+        block_given? ? create_bridge_command(method, &Proc.new) : create_bridge_command(method)
 
         delegate_driver_method method
         delegate_from_appium_driver method
@@ -332,14 +343,9 @@ module Appium
       end
 
       # @private
-      def create_bridge_command(method, verb, path)
+      def create_bridge_command(method)
         Selenium::WebDriver::Remote::Bridge.class_eval do
-          command method, verb, path
-          if block_given?
-            class_eval(&Proc.new)
-          else
-            define_method(method) { execute method }
-          end
+          block_given? ? class_eval(&Proc.new) : define_method(method) { execute method }
         end
       end
 
@@ -353,19 +359,44 @@ module Appium
       #   ```
       def extend_search_contexts
         Selenium::WebDriver::SearchContext.class_eval do
-          Selenium::WebDriver::SearchContext::FINDERS[:accessibility_id] = 'accessibility id'
+          def find_element_with_appium(*args)
+            how, what = extract_args(args)
+            by = _set_by_from_finders(how)
+            begin
+              bridge.find_element_by by, what.to_s, ref
+            rescue Selenium::WebDriver::Error::TimeOutError
+              raise Selenium::WebDriver::Error::NoSuchElementError
+            end
+          end
+
+          def find_elements_with_appium(*args)
+            how, what = extract_args(args)
+            by = _set_by_from_finders(how)
+            begin
+              bridge.find_elements_by by, what.to_s, ref
+            rescue Selenium::WebDriver::Error::TimeOutError
+              raise Selenium::WebDriver::Error::NoSuchElementError
+            end
+          end
+
+          def _set_by_from_finders(how)
+            finders = ::Selenium::WebDriver::SearchContext::FINDERS.merge ::Appium::Driver::SearchContext::FINDERS
+            by = finders[how.to_sym]
+            raise ArgumentError, "cannot find element by #{how.inspect}" unless by
+            by
+          end
         end
       end
 
       def add_touch_actions
-        add_endpoint_method(:touch_actions, 'session/:session_id/touch/perform') do
+        add_endpoint_method(:touch_actions) do
           def touch_actions(actions)
             actions = { actions: [actions].flatten }
             execute :touch_actions, {}, actions
           end
         end
 
-        add_endpoint_method(:multi_touch, 'session/:session_id/touch/multi/perform') do
+        add_endpoint_method(:multi_touch) do
           def multi_touch(actions)
             execute :multi_touch, {}, actions: actions
           end
@@ -378,6 +409,80 @@ module Appium
 
         delegate_from_appium_driver(:pinch, Appium::MultiTouch)
         delegate_from_appium_driver(:zoom, Appium::MultiTouch)
+      end
+
+      def add_ime_actions
+        # Commands for IME are defined in the following commands.rb, but the driver have no bridge.
+        # So, appium_lib define just bridge here.
+        # https://github.com/SeleniumHQ/selenium/blob/selenium-3.0.1/rb/lib/selenium/webdriver/remote/commands.rb#L184-L192
+
+        # @!method ime_activate
+        #   Make an engine that is available active.
+        #
+        #   Android only.
+        #   @param [String] The IME owning the activity [required]
+        #
+        #   ```ruby
+        #   ime_activate engine: 'com.android.inputmethod.latin/.LatinIME'
+        #   ```
+        add_endpoint_method(:ime_activate) do
+          def ime_activate(ime_name)
+            execute :imeActivateEngine, {}, engine: ime_name
+          end
+        end
+
+        # @!method ime_available_engines
+        #   List all available input engines on the machine.
+        #   Android only.
+        #
+        #   ```ruby
+        #   ime_available_engines #=> Get the list of IME installed in the target device
+        #   ```
+        add_endpoint_method(:ime_available_engines) do
+          def ime_available_engines
+            execute :imeGetAvailableEngines
+          end
+        end
+
+        # @!method ime_active_engine
+        #   Get the name of the active IME engine.
+        #   Android only.
+        #
+        #   ```ruby
+        #   ime_active_engine #=> Get the current active IME such as 'com.android.inputmethod.latin/.LatinIME'
+        #   ```
+        add_endpoint_method(:ime_active_engine) do
+          def ime_active_engine
+            execute :imeGetActiveEngine
+          end
+        end
+
+        # @!method ime_activated
+        #   Indicates whether IME input is active at the moment (not if it is available).
+        #   Android only.
+        #
+        #   ```ruby
+        #   ime_activated #=> True if IME is activated
+        #   ```
+        add_endpoint_method(:ime_activated) do
+          def ime_activated
+            execute :imeIsActivated
+          end
+        end
+
+        # @!method ime_deactivate
+        #   De-activates the currently-active IME engine.
+        #
+        #   Android only.
+        #
+        #   ```ruby
+        #   ime_deactivate #=> Deactivate current IME engine
+        #   ```
+        add_endpoint_method(:ime_deactivate) do
+          def ime_deactivate
+            execute :imeDeactivate, {}
+          end
+        end
       end
     end # class << self
 

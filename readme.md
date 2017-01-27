@@ -16,7 +16,9 @@
 
 Helper methods for writing cross platform (iOS, Android) tests in Ruby using Appium. Note that user waits should not exceed 120 seconds if they're going to run on Sauce Labs.
 
-Make sure you're using Appium 1.0.0 or newer and Ruby 1.9.3+ with upgraded rubygems and bundler.
+Make sure you're using Appium 1.0.0 or newer and Ruby 2.2+ with upgraded rubygems and bundler.
+
+XCUITest for iOS requires `Appium 1.6.0+`. `appium_lib9.1.0+` requires `selenium-webdriver3.0.2+`.(`appium_lib9.0.0` or less requires `selenium-webdriver2.x`)
 
 #### Start appium server
 
@@ -43,6 +45,8 @@ gem install --no-rdoc --no-ri appium_lib
 - `SAUCE_USERNAME` Sauce username
 - `SAUCE_ACCESS_KEY` Sauce API key
 
+(Note: If these variables are set, all tests will use Sauce Labs unless over-ridden in configuration.)
+
 #### Troubleshooting
 
 1. Does `adb kill-server; adb devices` list an active Android device?
@@ -54,6 +58,7 @@ gem install --no-rdoc --no-ri appium_lib
 - [Overview](https://github.com/appium/ruby_lib/blob/master/docs/docs.md) 
 - [Ruby Android methods](https://github.com/appium/ruby_lib/blob/master/docs/android_docs.md)
 - [Ruby iOS methods](https://github.com/appium/ruby_lib/blob/master/docs/ios_docs.md)
+    - [Tips for XCUITest for iOS](https://github.com/appium/ruby_lib/blob/master/docs/ios_xcuitest.md)
 - [Appium Server docs](https://github.com/appium/appium/tree/master/docs)
 
 #### Logging

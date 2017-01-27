@@ -18,8 +18,10 @@ describe 'device/device' do
   end
 
   t 'lock' do
+    raise NotImplementedError, "XCUITest(Appium1.6.2) doesn't support yet" if UI::Inventory.xcuitest?
+
     lock 5
-    tag('UIAButton').name.must_equal 'SlideToUnlock'
+    tag(UI::Inventory.button).name.must_equal 'SlideToUnlock'
 
     # It appears that lockForDuration doesn't.
     close_app
@@ -32,18 +34,22 @@ describe 'device/device' do
   end
 
   t 'app_installed' do
+    raise NotImplementedError, "XCUITest(Appium1.6.2) doesn't support yet" if UI::Inventory.xcuitest?
+
     installed = app_installed? 'Derrp'
     installed.must_equal false
   end
 
   t 'shake' do
+    raise NotImplementedError, "XCUITest(Appium1.6.2) doesn't support yet" if UI::Inventory.xcuitest?
+
     shake
   end
 
   t 'close and launch' do
     close_app
     launch_app
-    tag('UIANavigationBar').name.must_equal 'UICatalog'
+    tag(UI::Inventory.navbar).name.must_equal 'UICatalog'
   end
 
   t 'reset' do
@@ -75,23 +81,23 @@ describe 'device/device' do
   end
 
   t 'swipe' do
-    swipe start_x: 75, start_y: 500, end_x: 75, end_y: 0, duration: 800
-  end
-
-  t 'pinch & zoom' do
-    wait { id('ImagesExplain').click }
-    # both of these appear to do nothing on iOS 8
-    zoom 200
-    pinch 75
-    go_back
+    swipe start_x: 75, start_y: 500, offset_x: 75, offset_y: 0, duration: 800
   end
 
   t 'pull_file' do
+    # Selenium::WebDriver::Error::UnknownError: An unknown server-side error occurred while processing the command.
+    # Original error: Cannot read property 'getDir' of undefined
+    raise NotImplementedError, "XCUITest(Appium1.6.2) doesn't support yet" if UI::Inventory.xcuitest?
+
     read_file = pull_file 'Library/AddressBook/AddressBook.sqlitedb'
     read_file.start_with?('SQLite format').must_equal true
   end
 
   t 'pull_folder' do
+    # Selenium::WebDriver::Error::UnknownError: An unknown server-side error occurred while processing the command.
+    # Original error: Cannot read property 'getDir' of undefined
+    raise NotImplementedError, "XCUITest(Appium1.6.2) doesn't support yet" if UI::Inventory.xcuitest?
+
     data = pull_folder 'Library/AddressBook'
     data.length.must_be :>, 1
   end

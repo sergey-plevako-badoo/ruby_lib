@@ -1,3 +1,116 @@
+#### v9.2.0 2017-01-09
+
+- [958ae3e](https://github.com/appium/ruby_lib/commit/958ae3e2fc84b78191baf22e967c8a2fb7eded22) Release 9 2 0 (#460)
+- [292acdf](https://github.com/appium/ruby_lib/commit/292acdf323e7725ef6cc09f2c56d94a8f54ec801) update changelog for 9.2.0 (#458)
+- [1457728](https://github.com/appium/ruby_lib/commit/1457728872214746d9792d916a262a5f996e78ef) Remove last waits (#456)
+- [b10cf83](https://github.com/appium/ruby_lib/commit/b10cf837edafea96e2b2d13e7adf6a87dd448723) add examples for predicate (#455)
+- [d050100](https://github.com/appium/ruby_lib/commit/d050100c0f461c639c417f64ec12d569c412bfb6) Add some documents (#454)
+- [6ee434f](https://github.com/appium/ruby_lib/commit/6ee434f9dbabb7bdb775692382972731c39a71c9) set auomation name from server if client side is nil (#451)
+- [6abb146](https://github.com/appium/ruby_lib/commit/6abb14627fc454684ad4766d9dd95dfd4b52d564) add link to locatorStrategies (#449)
+- [74dc747](https://github.com/appium/ruby_lib/commit/74dc747f56fe78f2bd883c1070d2ea25af0fa382) add changelog (#448)
+- [4e8a449](https://github.com/appium/ruby_lib/commit/4e8a449bf2ff5a3e6f778389b336ecd1a712c25f) arrange a bit (#446)
+- [4efeefa](https://github.com/appium/ruby_lib/commit/4efeefa7e3cb751dcc11280e26169e4ba57b3065) Release 9 1 3 (#445)
+- [ba2fbdc](https://github.com/appium/ruby_lib/commit/ba2fbdcb206609259134fc09eac7940c21cc2c13) Release 9.1.3
+
+
+#### v9.1.3 2017-01-04
+
+- [ba2fbdc](https://github.com/appium/ruby_lib/commit/ba2fbdcb206609259134fc09eac7940c21cc2c13) Release 9.1.3
+- [f0c15c5](https://github.com/appium/ruby_lib/commit/f0c15c5b0211b40a8412583c5180a19dc4b56047) update documentations in xcuitest (#444)
+- [67114d1](https://github.com/appium/ruby_lib/commit/67114d1c16f4289c9aa4e7bb02fcc05a08cc3575) Improve performance for button/s and text/s (#442)
+- [2d1f30e](https://github.com/appium/ruby_lib/commit/2d1f30e9b4d89dc51bb546d535c0bd3f14687394) simplify a bit and move tests to suitable file (#441)
+- [1efed4c](https://github.com/appium/ruby_lib/commit/1efed4cbf45b889ca9e64f91346e786a89ba3c42) add documentation for alternative long_press method (#440)
+- [71e629f](https://github.com/appium/ruby_lib/commit/71e629f34065b6a6e39e9bc18bcf4eb0576be0cb) update small changes (#439)
+- [cec023c](https://github.com/appium/ruby_lib/commit/cec023cc9388afe5283c7637622f369a9b891b1e) Use open timeout and read timeout and require selenium-webdriver3.0.4+ (#437)
+- [ffa78a6](https://github.com/appium/ruby_lib/commit/ffa78a64b1dd68fa24c80779eff0a9c2ab685c19) Release 9 1 2 (#434)
+- [22401b0](https://github.com/appium/ruby_lib/commit/22401b065f2317e82d37b5188ad9c18c701b0a41) Release 9.1.2
+
+
+#### v9.1.2 2016-12-25
+
+- [22401b0](https://github.com/appium/ruby_lib/commit/22401b065f2317e82d37b5188ad9c18c701b0a41) Release 9.1.2
+- [ab3ba8e](https://github.com/appium/ruby_lib/commit/ab3ba8e0fd9e6867b63c5cd0a3f929aca8fc236b) Fix set immediate value (#432)
+- [75acc43](https://github.com/appium/ruby_lib/commit/75acc4313fffca87c3c9c54214175a9981c0d540) disable lint unified integer (#431)
+- [baf5f3c](https://github.com/appium/ruby_lib/commit/baf5f3c7bc3cf51b5f38878f40d88563546dfc10) update tests for finds_exact (#429)
+- [42df79b](https://github.com/appium/ruby_lib/commit/42df79b4cd0b5a36f52628f0acdeb688c5170c0c) fix identicalConditionalBranches (#428)
+- [2a91a6d](https://github.com/appium/ruby_lib/commit/2a91a6dcd50097101e212b1ed9fc64a470dd95da) add appium_client_version (#421)
+- [7c39087](https://github.com/appium/ruby_lib/commit/7c39087676071a4cf27d97fc309e13e968dfb21c) fix rubocop associated with block call (#422)
+- [1979cd8](https://github.com/appium/ruby_lib/commit/1979cd824947d1182fb99ff0f00dbfff165c0aab) Release 9 1 1 (#427)
+- [c016ba3](https://github.com/appium/ruby_lib/commit/c016ba3f9d265ca8b851ec8ed85670ee50b4215b) Release 9.1.1
+
+
+#### v9.1.1 2016-12-19
+
+- [c016ba3](https://github.com/appium/ruby_lib/commit/c016ba3f9d265ca8b851ec8ed85670ee50b4215b) Release 9.1.1
+- [125f144](https://github.com/appium/ruby_lib/commit/125f144481f0b01ab7014ca83968924e7bf827ba) bugfix for finding an array of exact elements in ios (#424)
+- [586205a](https://github.com/appium/ruby_lib/commit/586205ab9d6ce0c286a6036616a7755b74f6a1ba) Release 9 1 0 (#419)
+- [ba9ec64](https://github.com/appium/ruby_lib/commit/ba9ec64031f242b3065674b1e4f8b236b391f9fa) Release 9.1.0
+
+
+#### v9.1.0 2016-12-18
+
+- [ba9ec64](https://github.com/appium/ruby_lib/commit/ba9ec64031f242b3065674b1e4f8b236b391f9fa) Release 9.1.0
+- [5e2ed6a](https://github.com/appium/ruby_lib/commit/5e2ed6a984837ff30efa39ebd36e2ee5fc607c89) update readme and template (#418)
+- [e4b4426](https://github.com/appium/ruby_lib/commit/e4b4426a1322a3a552bad93c4d8a54c9592bebc6) Fix rubocop (#417)
+- [da4ed34](https://github.com/appium/ruby_lib/commit/da4ed34296ebffff8ed6d6b970ca5ca5a47ca72f) Require ruby 22 (#416)
+- [858863a](https://github.com/appium/ruby_lib/commit/858863ad88e0d4e32acb109c6bd087a040817fd2) Support over selenium-webdriver3.0.2 (#413)
+- [fbcaa62](https://github.com/appium/ruby_lib/commit/fbcaa62219eca64ebe8892f02d91b0103ee53909) update selenium-webdriver 3.0 and add patches to work with Appium (#383)
+- [19fb322](https://github.com/appium/ruby_lib/commit/19fb322fe0d9fc184fc708d111764e8b38c3c188) update some tips for finding elements (#412)
+- [e485121](https://github.com/appium/ruby_lib/commit/e4851210a2d0202bea3a62aea7f7c33798476466) Release 9 0 0 (#411)
+- [54ff9c4](https://github.com/appium/ruby_lib/commit/54ff9c45df80ce901b718347e79e761f93a4316b) Release 9.0.0
+
+
+#### v9.0.0 2016-12-09
+
+- [54ff9c4](https://github.com/appium/ruby_lib/commit/54ff9c45df80ce901b718347e79e761f93a4316b) Release 9.0.0
+- [930d4c7](https://github.com/appium/ruby_lib/commit/930d4c701865cfab603c5030bd92d6049bb8b5ad) add documentations (#410)
+- [e765d1f](https://github.com/appium/ruby_lib/commit/e765d1f437a842c942e3efde0a33e15327571ced) Fix tests for xcuitest strategy (#408)
+- [cfabca1](https://github.com/appium/ruby_lib/commit/cfabca11933247e7fba6946d3128cf58035bd820) Feature/xcuitest (#388)
+- [75dd133](https://github.com/appium/ruby_lib/commit/75dd133d3279233312926aff66ec026a7c2e8766) Release 8 2 1 (#407)
+- [ad91ee4](https://github.com/appium/ruby_lib/commit/ad91ee47a96bf7a19b6f784dc760ac70b8788e5a) Release 8.2.1
+
+
+#### v8.2.1 2016-11-29
+
+- [ad91ee4](https://github.com/appium/ruby_lib/commit/ad91ee47a96bf7a19b6f784dc760ac70b8788e5a) Release 8.2.1
+- [62488a5](https://github.com/appium/ruby_lib/commit/62488a551ee2545096a2f4256a41c39a82d506fc) bugfix_swipe_with_deltas (#405)
+- [fdeec0d](https://github.com/appium/ruby_lib/commit/fdeec0de9ac198d77d361c1fb18fc64679d98ac2) Add docs (#404)
+- [63ce8fa](https://github.com/appium/ruby_lib/commit/63ce8fa4eafffe0607b4fc11d86fbdab01a8f7bb) Release 8.2.0 (#403)
+- [4535ec9](https://github.com/appium/ruby_lib/commit/4535ec91f435255ae31b4c4fea9d96e5405d79f5) Release 8.2.0
+- [afcc91e](https://github.com/appium/ruby_lib/commit/afcc91eabea63ec93f70f22b1095f7ce7022af76) Release 8.1.0
+
+
+#### v8.2.0 2016-11-26
+
+- [4535ec9](https://github.com/appium/ruby_lib/commit/4535ec91f435255ae31b4c4fea9d96e5405d79f5) Release 8.2.0
+- [afcc91e](https://github.com/appium/ruby_lib/commit/afcc91eabea63ec93f70f22b1095f7ce7022af76) Release 8.1.0
+- [8a08021](https://github.com/appium/ruby_lib/commit/8a080213dbe4843f50b6acfbe80628209bfd143d) add endpoint for handling IME in remote bridge (#400)
+- [222cd47](https://github.com/appium/ruby_lib/commit/222cd47f69ba24b82a122734b0a136e5d6aed330) Allow to name toml files differently than appium.txt, fixes #280 (#397)
+- [d3a9235](https://github.com/appium/ruby_lib/commit/d3a9235767d6ba770246afac0e62ac58da0eb4b0) update release note and documentation (#396)
+- [b5ac170](https://github.com/appium/ruby_lib/commit/b5ac170f1269e273a01a51429c5e45d2f3e989b1) Release 810 (#394)
+- [95d3a65](https://github.com/appium/ruby_lib/commit/95d3a6535472559590c4d043e887d15acc445a1a) Release 8.1.0
+- [4b5d817](https://github.com/appium/ruby_lib/commit/4b5d81752565f02645e301555e4be78b0235daf5) Release 8.1.0
+
+
+#### v8.1.0 2016-11-18
+
+- [95d3a65](https://github.com/appium/ruby_lib/commit/95d3a6535472559590c4d043e887d15acc445a1a) Release 8.1.0
+- [4b5d817](https://github.com/appium/ruby_lib/commit/4b5d81752565f02645e301555e4be78b0235daf5) Release 8.1.0
+- [6c38ca5](https://github.com/appium/ruby_lib/commit/6c38ca5276342ade6168eb9080424a03608a1b3e) replace end_ to delta_ because end_ is deprecated in #380 (#392)
+- [09654ab](https://github.com/appium/ruby_lib/commit/09654ab9dbc69a31eff7e7bd426db985da09e3b8) Add EventListener to Driver (#389)
+- [2d8fc5f](https://github.com/appium/ruby_lib/commit/2d8fc5ff7acce9417847e66772b59fc691c1dbaa) Added touch id endpoint (#384)
+- [11b80e3](https://github.com/appium/ruby_lib/commit/11b80e398e98fbc71e580f659764ba54f87da4f3) Added double_tap and two_finger_tap to Appium::TouchAction (#377)
+- [2a9f79c](https://github.com/appium/ruby_lib/commit/2a9f79caae337e8770aa56c47d0bd9c17cf1569f) swipe proffers use of delta_x, delta_y instead of end_x, end_y which … (#380)
+- [6705226](https://github.com/appium/ruby_lib/commit/67052266b601270d2432c18b47739c9681af5563) Use secure sauce endpoint (https://ondemand.saucelabs.com:443) (#378)
+- [acdcff0](https://github.com/appium/ruby_lib/commit/acdcff06ae10f1ff4461ed94486346b4514a6e3a) Merge pull request #376 from sergey-plevako-badoo/add_double_tap_and_two_finger_tap
+- [eea3a6f](https://github.com/appium/ruby_lib/commit/eea3a6feaccd317b8a8ac4e2f83cc867613cdd02) Added double_tap and two_finger_tap to Appium::TouchAction
+- [ac03116](https://github.com/appium/ruby_lib/commit/ac03116756a72fbd624fa32ea886123b955d7089) Include url in raised connection error (#374)
+- [924c28b](https://github.com/appium/ruby_lib/commit/924c28bfa675b23b2519565dbcb0ee3531f05cd9) Fix docs of find elements (#372)
+- [8b71cdc](https://github.com/appium/ruby_lib/commit/8b71cdc81be8f50f5f97f0131aee5f3dc67c3eb7) Add default value for duration in swipe (#368)
+- [f58c8aa](https://github.com/appium/ruby_lib/commit/f58c8aa5a9eb349a7224c5c460c5a866444ff5dd) Merge pull request #363 from SrinivasanTarget/master
+- [f8cff26](https://github.com/appium/ruby_lib/commit/f8cff2659992962b6ab5bf49fa075b02d2d110ef) updated webdriver dependency
+
+
 #### v8.0.2 2016-01-29
 
 - [d67cbba](https://github.com/appium/ruby_lib/commit/d67cbbac43f511515f6e6f53197cfae2bb7671e0) Release 8.0.2

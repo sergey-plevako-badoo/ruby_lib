@@ -23,8 +23,10 @@ describe 'ios/element/text' do
   end
 
   t 'last_text' do
-    last_text.text.must_equal uiview_transitions
-    last_text.name.must_equal uiview_transitions
+    expected = 'Transitions'
+
+    last_text.text.must_equal expected
+    last_text.name.must_equal expected
   end
 
   t 'text' do

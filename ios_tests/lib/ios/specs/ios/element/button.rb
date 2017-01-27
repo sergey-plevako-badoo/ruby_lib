@@ -3,7 +3,7 @@ describe 'ios/element/button' do
   def before_first
     screen.must_equal catalog
     # nav to buttons activity
-    wait { text('buttons').click }
+    wait { UI::Inventory.xcuitest? ? find_element(:name, 'Buttons').click : text('buttons').click }
   end
 
   def after_last
@@ -21,7 +21,7 @@ describe 'ios/element/button' do
 
   t 'button' do
     # by index
-    button(3).name.must_equal gray
+    button(3).name.must_equal gray # or UIButtonTypeInfoDark in XCUITest
 
     # by name contains
     button('ray').name.must_equal gray
@@ -29,6 +29,7 @@ describe 'ios/element/button' do
 
   t 'buttons' do
     exp = ['Back', 'Back', 'Gray', 'Right pointing arrow']
+
     target_buttons = buttons('a')
     target_buttons.map(&:name).must_equal exp
     target_buttons.length.must_equal exp.length
@@ -39,7 +40,8 @@ describe 'ios/element/button' do
   end
 
   t 'last_button' do
-    last_button.name.must_equal 'Rounded'
+    expected = 'Rounded'
+    last_button.name.must_equal expected
   end
 
   t 'button_exact' do

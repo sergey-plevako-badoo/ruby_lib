@@ -1,22 +1,24 @@
-#### Documentation
+### Documentation
 
 - find_elements returns an empty array [] when no elements are found.
 - button(int), textfield(int) use xpath so 1 is the first button, 2 the second etc. 0 is invalid.
 
-##### [app_lib on rubydoc.info](http://www.rubydoc.info/github/appium/ruby_lib/master/toplevel)
-
-- [iOS UI Automation](http://developer.apple.com/library/ios/#documentation/DeveloperTools/Reference/UIAutomationRef/_index.html) Example use `@driver.execute_script "UIATarget.localTarget().frontMostApp().mainWindow().rect()"
-`
-- [Android UIAutomator](http://developer.android.com/tools/help/uiautomator/index.html)
-- [UiSelector.java](https://android.googlesource.com/platform/frameworks/testing/+/master/uiautomator/library/core-src/com/android/uiautomator/core/UiSelector.java)
-- [Ruby selenium-webdriver](http://selenium.googlecode.com/svn/trunk/docs/api/rb/index.html)
+#### [app_lib on rubydoc.info](http://www.rubydoc.info/github/appium/ruby_lib/master/toplevel)
+##### General
 - [Appium](https://github.com/appium/appium/blob/master/README.md)
-- [Appium extension](https://github.com/appium/appium/wiki/Automating-mobile-gestures)
-- [mechanic names of elements](https://github.com/jaykz52/mechanic/blob/8c490e1d225f384847e47ffdafb47cc2248bb96c/src/mechanic-core.js#L28)
-- [All methods supported by Appium](https://github.com/appium/appium/wiki/JSON-Wire-Protocol:-Supported-Methods)
-- [Appium's mobile gesture docs](https://github.com/appium/appium/wiki/Automating-mobile-gestures)
+- [Ruby selenium-webdriver](https://github.com/SeleniumHQ/selenium/wiki/Ruby-Bindings)
+- [All methods supported by Appium](https://github.com/appium/appium-base-driver/blob/master/docs/mjsonwp/protocol-methods.md)
 - [MiniTest Expectations](http://docs.seattlerb.org/minitest/Minitest/Expectations.html)
 
+##### iOS
+- [iOS UI Automation](http://developer.apple.com/library/ios/#documentation/DeveloperTools/Reference/UIAutomationRef/_index.html) Example use `@driver.execute_script "UIATarget.localTarget().frontMostApp().mainWindow().rect()"
+`
+    - [mechanic names of elements](https://github.com/jaykz52/mechanic/blob/8c490e1d225f384847e47ffdafb47cc2248bb96c/src/mechanic-core.js#L28)
+- [WebDriverAgent](https://github.com/facebook/WebDriverAgent)
+
+##### Android
+- [Android UIAutomator](http://developer.android.com/tools/help/uiautomator/index.html)
+- [UiSelector.java](https://android.googlesource.com/platform/frameworks/testing/+/master/uiautomator/library/core-src/com/android/uiautomator/core/UiSelector.java)
 
 --
 
@@ -36,7 +38,7 @@ Example of automating the built in Android settings.
 ```ruby
 # run Pry, and paste the following
 apk = { 
-        platformName: :android,
+        platformName: 'android',
         deviceName: :nexus,
         appPackage: 'com.android.settings',
         appActivity: '.Settings',
@@ -49,7 +51,7 @@ Appium::Driver.new(caps: apk).start_driver
 
 Example use of Appium's mobile gesture.
 
-> @driver.execute_script 'mobile: tap', :x => 0, :y => 500
+> @driver.find_element()
 
 `console.rb` uses some code from [simple_test.rb](
 https://github.com/appium/appium/blob/82995f47408530c80c3376f4e07a1f649d96ba22/sample-code/examples/ruby/simple_test.rb) and is released under the [same license](https://github.com/appium/appium/blob/c58eeb66f2d6fa3b9a89d188a2e657cca7cb300f/LICENSE) as Appium. The [Accessibility Inspector](https://developer.apple.com/library/ios/#documentation/UserExperience/Conceptual/iPhoneAccessibility/Testing_Accessibility/Testing_Accessibility.html) is helpful for discovering button names and textfield values.
@@ -59,7 +61,7 @@ Long click on an ImageView in Android.
 
 ```
 last_image = find_elements(:tag_name, :ImageView).last
-mobile(:longClick, element: last_image.ref)
+long_press(element: last_image)
 ```
 
 Rotate examples.
@@ -99,33 +101,30 @@ iOS uses accessibility label with a fallback to text.
 
 #### button
 0. `(Button) button(index)` Find a button by index.
-0. `(Button) button(text, number = 0)` Find a button by text and optionally number.
-0. `(Button) button_include(text)` Get the first button that includes text.
+0. `(Button) button(text)` Get the first button that includes text.
 0. `(Array<String>, Array<Buttons>) buttons(text = nil)` Get an array of button texts or button elements if text is provided.
-0. `(Array<Button>) buttons_include(text)` Get all buttons that include text.
+0. `(Array<Button>) buttons(text)` Get all buttons that include text.
 0. `(Button) first_button` Get the first button element.
 0. `(Button) last_button` Get the last button element.
 
 #### textfield
 0. `(Textfield) textfield(index)` Find a textfield by index.
-0. `(Array<Textfield>) e_textfields` Get an array of textfield elements.
+0. `(Array<Textfield>) textfields` Get an array of textfield elements.
 0. `(Textfield) first_textfield` Get the first textfield element.
 0. `(Textfield) last_textfield` Get the last textfield element.
-0. `(Textfield) textfield(text)` Get the first textfield that matches text.
-0. `(Textfield) textfield_include(text)` Get the first textfield that includes text.
-0. `(Array<String>) textfields` Get an array of textfield texts.
+0. `(Textfield) textfield_exact(text)` Get the first textfield that matches text.
+0. `(Textfield) textfield(text)` Get the first textfield that includes text.
 
 #### text
 
 The Static Text methods have been prefixed with `s_` to avoid conflicting with the generic text methods.
 
-0. `(Text) s_text(index)` Find a text by index.
-0. `(Array<Text>) s_e_texts` Get an array of text elements.
-0. `(Text) first_s_text` Get the first text element.
-0. `(Text) last_s_text` Get the last text element.
-0. `(Text) s_text(text)` Get the first element that matches text.
-0. `(Text) s_text_include(text)` Get the first textfield that includes text.
-0. `(Array<String>) s_texts` Get an array of text texts.
+0. `(Text) text(index)` Find a text by index.
+0. `(Array<Text>) texts` Get an array of text elements.
+0. `(Text) first_text` Get the first text element.
+0. `(Text) last_text` Get the last text element.
+0. `(Text) text_exact(text)` Get the first element that matches text.
+0. `(Text) text(text)` Get the first textfield that includes text.
 
 #### window
 0. `(Object) window_size` Get the window's size.
@@ -166,8 +165,6 @@ s.send_keys 'hello'
 s.value == ios_password('hello'.length)
 ```
 
-[routing.js](https://github.com/appium/appium/blob/master/app/routing.js#L69) lists not yet implemented end points.
-
 --
 
 #### Driver
@@ -182,11 +179,9 @@ s.value == ios_password('hello'.length)
 
 `find_elements` calls `$driver.find_elements`
 
-`mobile :swipe, endX: 100, endY: 100, duration: 0.01` calls `$driver.execute_script 'mobile: swipe', endX: 100, endY: 100, duration: 0.01`
-
 `no_wait` will set implicit wait to 0. `$driver.manage.timeouts.implicit_wait = 0`
 
-`set_wait` will set implicit wait to default 30 seconds. `$driver.manage.timeouts.implicit_wait = 30`
+`set_wait` will set implicit wait to default seconds. `$driver.manage.timeouts.implicit_wait = default`
 
 `set_wait(timeout_seconds)` will set implicit wait to desired timeout. `$driver.manage.timeouts.implicit_wait = timeout`
 
@@ -216,7 +211,7 @@ au._returnElems(r);
 execute_script s
 ```
 
-#### XPath
+#### XPath(UIAutomation)
 
 See [#194](https://github.com/appium/appium/pull/194/files) for details.
 
@@ -304,7 +299,7 @@ mobile gestures on iOS are known to be crashy. Fix by adding pre/post event slee
 
 ```ruby
 sleep 3
-mobile :tap, x: 10, y: 100, duration: 0.5
+tap(x: 10, y: 100)
 sleep 1
 ```
 

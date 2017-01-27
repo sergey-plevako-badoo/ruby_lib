@@ -1,5 +1,38 @@
 module Appium
   module Ios
+    class UITestElementsPrinter < Nokogiri::XML::SAX::Document
+      attr_accessor :filter
+
+      def start_element(type, attrs = [])
+        return if filter && !filter.eql?(type)
+        page = attrs.inject({}) do |hash, attr|
+          hash[attr[0]] = attr[1] if %w(name label value hint).include?(attr[0])
+          hash
+        end
+        _print_attr(type, page['name'], page['label'], page['value'], page['hint'])
+      end
+
+      def _print_attr(type, name, label, value, hint)
+        if name == label && name == value
+          puts type.to_s if name || label || value || hint
+          puts "   name, label, value: #{name}" if name
+        elsif name == label
+          puts type.to_s if name || label || value || hint
+          puts "   name, label: #{name}" if name
+          puts "   value: #{value}" if value
+        elsif name == value
+          puts type.to_s if name || label || value || hint
+          puts "   name, value: #{name}" if name
+          puts "  label: #{label}" if label
+        else
+          puts type.to_s if name || label || value || hint
+          puts "   name: #{name}" if name
+          puts "  label: #{label}" if label
+          puts "  value: #{value}" if value
+        end
+        puts "   hint: #{hint}" if hint
+      end
+    end
     # iOS only. On Android uiautomator always returns an empty string for EditText password.
     #
     # Password character returned from value of UIASecureTextField
@@ -51,34 +84,11 @@ module Appium
         visible = fix_space element['visible']
         type    = fix_space element['type']
 
-        # TODO: Rubocop warning cleanup
-        # rubocop:disable Metrics/BlockNesting
-
         # if class_name is set, mark non-matches as invisible
-        visible = (type.downcase.include?(class_name)).to_s if class_name
+        visible = (type.downcase.include? class_namet).to_s if class_name
         if visible && visible == 'true'
-          if name == label && name == value
-            puts "#{type}" if name || label || value || hint
-            puts "   name, label, value: #{name}" if name
-            puts "   hint: #{hint}" if hint
-          elsif name == label
-            puts "#{type}" if name || label || value || hint
-            puts "   name, label: #{name}" if name
-            puts "   value: #{value}" if value
-            puts "   hint: #{hint}" if hint
-          elsif name == value
-            puts "#{type}" if name || label || value || hint
-            puts "   name, value: #{name}" if name
-            puts "  label: #{label}" if label
-            puts "   hint: #{hint}" if hint
-          else
-            puts "#{type}" if name || label || value || hint
-            puts "   name: #{name}" if name
-            puts "  label: #{label}" if label
-            puts "  value: #{value}" if value
-            puts "   hint: #{hint}" if hint
-          end
-          # rubocop:enable Metrics/BlockNesting
+
+          _print_attr(type, name, label, value, hint)
 
           # there may be many ids with the same value.
           # output all exact matches.
@@ -143,27 +153,27 @@ module Appium
         parser.parse s
         parser.document.result
       else
-        if window_number == -1
-          # if the 0th window has no children, find the next window that does.
-          target_window = source_window 0
-          target_window = source_window 1 if target_window['children'].empty?
-          get_page target_window, class_name
-        else
-          get_page source_window(window_number || 0), class_name
+
+        s = source_window(window_number || 0)
+        parser = Nokogiri::XML::SAX::Parser.new(UITestElementsPrinter.new)
+        if class_name
+          parser.document.filter = class_name.is_a?(Symbol) ? class_name.to_s : class_name
         end
+        parser.parse s
         nil
       end
     end
 
     # Gets the JSON source of window number
-    # @param window_number [Integer] the int index of the target window
+    # @param [Integer] _window_number The int index of the target window
     # @return [JSON]
-    def source_window(window_number = 0)
+    def source_window(_window_number = 0)
+      # TODO: update comments
       # appium 1.0 still returns JSON when getTree() is invoked so this
       # doesn't need to change to XML. If getTree() is removed then
       # source_window will need to parse the elements of getTreeForXML()\
       # https://github.com/appium/appium-uiauto/blob/247eb71383fa1a087ff8f8fc96fac25025731f3f/uiauto/appium/element.js#L145
-      execute_script "UIATarget.localTarget().frontMostApp().windows()[#{window_number}].getTree()"
+      get_source
     end
 
     # Prints parsed page source to console.
@@ -181,14 +191,18 @@ module Appium
     # @param id [String] the id to search for
     # @return [Element]
     def id(id)
-      find_element :id, id
+      find_element(:id, id)
     end
 
     # Return the iOS version as an array of integers
     # @return [Array<Integer>]
     def ios_version
-      ios_version = execute_script 'UIATarget.localTarget().systemVersion()'
-      ios_version.split('.').map(&:to_i)
+      if automation_name_is_xcuitest?
+        @driver.capabilities['platformVersion']
+      else
+        ios_version = execute_script 'UIATarget.localTarget().systemVersion()'
+        ios_version.split('.').map(&:to_i)
+      end
     end
 
     # Get the element of type class_name at matching index.
@@ -196,7 +210,7 @@ module Appium
     # @param index [Integer] the index
     # @return [Element]
     def ele_index(class_name, index)
-      fail 'Index must be >= 1' unless index == 'last()' || (index.is_a?(Integer) && index >= 1)
+      raise 'Index must be >= 1' unless index == 'last()' || (index.is_a?(Integer) && index >= 1)
       elements = tags(class_name)
 
       if index == 'last()'
@@ -207,17 +221,26 @@ module Appium
         result = elements[index]
       end
 
-      fail _no_such_element if result.nil?
+      raise _no_such_element if result.nil?
       result
     end
 
     # @private
     def string_attr_exact(class_name, attr, value)
-      %(//#{class_name}[@visible="true" and @#{attr}='#{value}'])
+      if automation_name_is_xcuitest?
+        if attr == '*'
+          %((//#{class_name})[@*[.="#{value}"]])
+        else
+          %((//#{class_name})[@#{attr}="#{value}"])
+        end
+      else
+        %(//#{class_name}[@visible="true" and @#{attr}="#{value}"])
+      end
     end
 
     # Find the first element exactly matching class and attribute value.
     # Note: Uses XPath
+    # Note: For XCUITest, this method return ALL elements include displayed or not displayed elements.
     # @param class_name [String] the class name to search for
     # @param attr [String] the attribute to inspect
     # @param value [String] the expected value of the attribute
@@ -228,6 +251,7 @@ module Appium
 
     # Find all elements exactly matching class and attribute value.
     # Note: Uses XPath
+    # Note: For XCUITest, this method return ALL elements include displayed or not displayed elements.
     # @param class_name [String] the class name to match
     # @param attr [String] the attribute to compare
     # @param value [String] the value of the attribute that the element must have
@@ -238,7 +262,15 @@ module Appium
 
     # @private
     def string_attr_include(class_name, attr, value)
-      %(//#{class_name}[@visible="true" and contains(translate(@#{attr},'#{value.upcase}', '#{value}'), '#{value}')])
+      if automation_name_is_xcuitest?
+        if attr == '*'
+          %((//#{class_name})[@*[contains(translate(., "#{value.upcase}", "#{value}"), "#{value}")]])
+        else
+          %((//#{class_name})[contains(translate(@#{attr}, "#{value.upcase}", "#{value}"), "#{value}")])
+        end
+      else
+        %(//#{class_name}[@visible="true" and contains(translate(@#{attr},"#{value.upcase}", "#{value}"), "#{value}")])
+      end
     end
 
     # Get the first tag by attribute that exactly matches value.
@@ -265,7 +297,6 @@ module Appium
     # @param class_name [String] the tag to match
     # @return [Element]
     def first_ele(class_name)
-      # XPath index starts at 1
       ele_index class_name, 1
     end
 
@@ -273,18 +304,25 @@ module Appium
     # @param class_name [String] the tag to match
     # @return [Element]
     def last_ele(class_name)
-      ele_index class_name, 'last()'
+      if automation_name_is_xcuitest?
+        visible_elements = tags class_name
+        raise _no_such_element if visible_elements.empty?
+        visible_elements.last
+      else
+        ele_index class_name, 'last()'
+      end
     end
 
-    # Returns the first visible element matching class_name
+    # Returns the first **visible** element matching class_name
     #
     # @param class_name [String] the class_name to search for
     # @return [Element]
     def tag(class_name)
-      ele_by_json(
-        typeArray:   [class_name],
-        onlyVisible: true
-      )
+      if automation_name_is_xcuitest?
+        raise_error_if_no_element tags(class_name).first
+      else
+        ele_by_json(typeArray: [class_name], onlyVisible: true)
+      end
     end
 
     # Returns all visible elements matching class_name
@@ -292,10 +330,12 @@ module Appium
     # @param class_name [String] the class_name to search for
     # @return [Element]
     def tags(class_name)
-      eles_by_json(
-        typeArray:   [class_name],
-        onlyVisible: true
-      )
+      if automation_name_is_xcuitest?
+        elements = @driver.find_elements :class, class_name
+        select_visible_elements elements
+      else
+        eles_by_json(typeArray: [class_name], onlyVisible: true)
+      end
     end
 
     # @private
@@ -322,7 +362,8 @@ module Appium
       }
     end
 
-    # Find the first element that contains value
+    # Find the first element that contains value.
+    # For Appium(automation name), not XCUITest
     # @param element [String] the class name for the element
     # @param value [String] the value to search for
     # @return [Element]
@@ -331,6 +372,7 @@ module Appium
     end
 
     # Find all elements containing value
+    # For Appium(automation name), not XCUITest
     # @param element [String] the class name for the element
     # @param value [String] the value to search for
     # @return [Array<Element>]
@@ -360,6 +402,7 @@ module Appium
     end
 
     # Find the first element exactly matching value
+    # For Appium(automation name), not XCUITest
     # @param element [String] the class name for the element
     # @param value [String] the value to search for
     # @return [Element]
@@ -368,6 +411,7 @@ module Appium
     end
 
     # Find all elements exactly matching value
+    # For Appium(automation name), not XCUITest
     # @param element [String] the class name for the element
     # @param value [String] the value to search for
     # @return [Element]
@@ -376,6 +420,7 @@ module Appium
     end
 
     # @private
+    # For Appium(automation name), not XCUITest
     # If there's no keyboard, then do nothing.
     # If there's no close key, fallback to window tap.
     # If close key is present then tap it.
@@ -397,7 +442,7 @@ module Appium
       #
       # Don't use window.tap. See https://github.com/appium/appium-uiauto/issues/28
       #
-      dismiss_keyboard = (<<-JS).strip
+      dismiss_keyboard = <<-JS.strip
       if (!au.mainApp().keyboard().isNil()) {
         var key = au.mainApp().keyboard().buttons()['#{close_key}']
         if (key.isNil()) {
@@ -437,7 +482,7 @@ module Appium
     #
     def _all_pred(opts)
       predicate = opts[:predicate]
-      fail 'predicate must be provided' unless predicate
+      raise 'predicate must be provided' unless predicate
       visible = opts.fetch :visible, true
       %($.mainApp().getAllWithPredicate("#{predicate}", #{visible});)
     end
@@ -470,25 +515,26 @@ module Appium
     end
 
     def _validate_object(*objects)
-      fail 'objects must be an array' unless objects.is_a? Array
+      raise 'objects must be an array' unless objects.is_a? Array
       objects.each do |obj|
         next unless obj # obj may be nil. if so, ignore.
 
         valid_keys   = [:target, :substring, :insensitive]
         unknown_keys = obj.keys - valid_keys
-        fail "Unknown keys: #{unknown_keys}" unless unknown_keys.empty?
+        raise "Unknown keys: #{unknown_keys}" unless unknown_keys.empty?
 
         target = obj[:target]
-        fail 'target must be a string' unless target.is_a? String
+        raise 'target must be a string' unless target.is_a? String
 
         substring = obj[:substring]
-        fail 'substring must be a boolean' unless [true, false].include? substring
+        raise 'substring must be a boolean' unless [true, false].include? substring
 
         insensitive = obj[:insensitive]
-        fail 'insensitive must be a boolean' unless [true, false].include? insensitive
+        raise 'insensitive must be a boolean' unless [true, false].include? insensitive
       end
     end
 
+    # For Appium(automation name), not XCUITest
     # typeArray - array of string types to search for. Example: ["UIAStaticText"]
     # onlyFirst - boolean. returns only the first result if true. Example: true
     # onlyVisible - boolean. returns only visible elements if true. Example: true
@@ -520,16 +566,16 @@ module Appium
     def _by_json(opts)
       valid_keys   = [:typeArray, :onlyFirst, :onlyVisible, :name, :label, :value]
       unknown_keys = opts.keys - valid_keys
-      fail "Unknown keys: #{unknown_keys}" unless unknown_keys.empty?
+      raise "Unknown keys: #{unknown_keys}" unless unknown_keys.empty?
 
       type_array = opts[:typeArray]
-      fail 'typeArray must be an array' unless type_array.is_a? Array
+      raise 'typeArray must be an array' unless type_array.is_a? Array
 
       only_first = opts[:onlyFirst]
-      fail 'onlyFirst must be a boolean' unless [true, false].include? only_first
+      raise 'onlyFirst must be a boolean' unless [true, false].include? only_first
 
       only_visible = opts[:onlyVisible]
-      fail 'onlyVisible must be a boolean' unless [true, false].include? only_visible
+      raise 'onlyVisible must be a boolean' unless [true, false].include? only_visible
 
       # name/label/value are optional. when searching for class only, then none
       # will be present.
@@ -539,22 +585,23 @@ module Appium
       # $._elementOrElementsByType will validate that the window isn't nil
       element_or_elements_by_type = <<-JS
         (function() {
-        var opts = #{opts.to_json};
-        var result = false;
+          var opts = #{opts.to_json};
+          var result = false;
 
-        try {
-          result = $._elementOrElementsByType($.mainWindow(), opts);
-        } catch (e) {
-        }
+          try {
+            result = $._elementOrElementsByType($.mainWindow(), opts);
+          } catch (e) {
+          }
 
-        return result;
+          return result;
         })();
       JS
 
       res = execute_script element_or_elements_by_type
-      res ? res : fail(Selenium::Client::CommandError, 'mainWindow is nil')
+      res ? res : raise(Appium::Ios::CommandError, 'mainWindow is nil')
     end
 
+    # For Appium(automation name), not XCUITest
     # example usage:
     #
     # eles_by_json({
@@ -575,7 +622,7 @@ module Appium
     def ele_by_json(opts)
       opts[:onlyFirst] = true
       result           = _by_json(opts).first
-      fail _no_such_element if result.nil?
+      raise _no_such_element if result.nil?
       result
     end
 

@@ -6,14 +6,20 @@ describe 'driver' do
     ENV['UPLOAD_FILE'] && ENV['SAUCE_USERNAME']
   end
 
-  t 'load_appium_txt' do
-    appium_txt = File.expand_path(File.join(Dir.pwd, 'lib'))
-    parsed   = Appium.load_appium_txt file: appium_txt, verbose: true
+  t 'load_settings' do
+    appium_txt = File.join(Dir.pwd, 'appium.txt')
+    parsed   = Appium.load_settings file: appium_txt, verbose: true
     apk_name = File.basename parsed[:caps][:app]
     assert_equal apk_name, 'api.apk'
   end
 
   describe 'Appium::Driver attributes' do
+    t 'no_wait' do
+      no_wait
+      proc { button('zz') }.must_raise Selenium::WebDriver::Error::NoSuchElementError
+      set_wait
+    end
+
     # attr_reader :default_wait, :app_path, :app_name, :selendroid,
     #            :app_package, :app_activity, :app_wait_activity,
     #            :sauce_username, :sauce_access_key, :port, :os, :debug
@@ -30,33 +36,48 @@ describe 'driver' do
 
     # Only used for Sauce Labs
     t 'verify all attributes' do
-      2.times { set_wait 1 } # must set twice to validate last_waits
-      actual              = driver_attributes
-      actual[:caps][:app] = File.basename actual[:caps][:app]
-      expected            = { caps:             { platformName: 'android',
-                                                  app:          'api.apk',
-                                                  appPackage:   'io.appium.android.apis',
-                                                  appActivity:  '.ApiDemos',
-                                                  deviceName:   'Nexus 7' },
+      actual                = driver_attributes
+      caps_app_for_teardown = actual[:caps][:app]
+      expected_app = File.absolute_path('api.apk')
+      expected_caps = ::Appium::Driver::Capabilities.init_caps_for_appium(platformName: 'Android',
+                                                                          app:          expected_app,
+                                                                          appPackage:   'io.appium.android.apis',
+                                                                          appActivity:  '.ApiDemos',
+                                                                          deviceName:   'Nexus 7')
+      expected            = { caps:             expected_caps,
+                              automationName:   nil,
                               custom_url:       false,
                               export_session:   false,
                               default_wait:     1,
-                              last_waits:       [1, 1],
                               sauce_username:   nil,
                               sauce_access_key: nil,
                               port:             4723,
                               device:           :android,
-                              debug:            true }
+                              debug:            true,
+                              listener:         nil,
+                              wait_timeout:     30,    # default
+                              wait_interval:    0.5 }  # default
 
       if actual != expected
         diff    = HashDiff.diff expected, actual
         diff    = "diff (expected, actual):\n#{diff}"
+
+        actual[:caps][:app] = caps_app_for_teardown
         # example:
         # change :ios in expected to match 'ios' in actual
         # [["~", "caps.platformName", :ios, "ios"]]
         message = "\n\nactual:\n\n: #{actual.ai}expected:\n\n#{expected.ai}\n\n#{diff}"
-        fail message
+        raise message
       end
+
+      actual_selenium_caps = actual[:caps][:platformName]
+      actual_selenium_caps.must_equal 'Android'
+      actual[:caps][:app] = caps_app_for_teardown
+    end
+
+    t 'default timeout for http client' do
+      http_client.open_timeout.must_equal 999_999
+      http_client.read_timeout.must_equal 999_999
     end
   end
 
@@ -127,10 +148,31 @@ describe 'driver' do
       end
     end
 
+    t 'client_version' do
+      client_version = appium_client_version
+      expected = { version: ::Appium::VERSION }
+      client_version.must_equal expected
+    end
+
     # Skip:
     #   ios_capabilities # save for iOS tests
     #   absolute_app_path # tested already by starting the driver for this test
     #   server_url # sauce labs only
+
+    t 'set_immediate_value' do
+      wait { find('app').click }
+      wait { find('activity').click }
+      wait { find('custom title').click }
+
+      message = 'hello'
+
+      wait do
+        elem = textfield(1)
+        elem.clear
+        set_immediate_value(elem, message)
+        elem.text.must_equal message
+      end
+    end
 
     t 'restart' do
       set_wait 1 # ensure wait is 1 before we restart.
@@ -139,7 +181,7 @@ describe 'driver' do
     end
 
     t 'driver' do
-      driver.browser.must_equal :Android
+      driver.browser.must_be_empty
     end
 
     # Skip:
@@ -148,7 +190,7 @@ describe 'driver' do
     #   start_driver # tested by restart
     #   no_wait  # posts value to server, it's not stored locally
     #   set_wait # posts value to server, it's not stored locally
-    #   execute_script # 'mobile: ' is deprecated and plain executeScript unsupported
+    #   execute_script # 'mobile: ' is deprecated and plain execute_script unsupported
 
     t 'default_wait' do
       set_wait 1
@@ -158,7 +200,7 @@ describe 'driver' do
     # returns true unless an error is raised
     t 'exists' do
       exists(0, 0) { true }.must_equal true
-      exists(0, 0) { fail 'error' }.must_equal false
+      exists(0, 0) { raise 'error' }.must_equal false
     end
 
     # any elements
@@ -180,7 +222,7 @@ describe 'driver' do
       begin
         set_location latitude: 55, longitude: -72, altitude: 33
       rescue Selenium::WebDriver::Error::UnknownError => e
-        # on android this method is expected to fail with this message when running
+        # on android this method is expected to raise with this message when running
         # on a regular device, or on genymotion.
         # error could be many messages, including:
         # ERROR running Appium command: port should be a number or string

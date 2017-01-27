@@ -1,9 +1,13 @@
 [caps]
 platformName = "ios"
-platformVersion = "9.2"
+platformVersion = "10.2"
 deviceName ="iPhone Simulator"
+automationName = 'XCUITest'
 app = "./UICatalog.app"
 
 [appium_lib]
 sauce_username = ""
 sauce_access_key = ""
+wait = 30
+wait_timeout = 20
+wait_interval = 1

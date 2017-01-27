@@ -13,13 +13,17 @@ describe 'ios/patch' do
     before_first
   end
 
-  # TODO: test 'label'
+  t 'label' do
+    textfield('<enter text>').label.must_equal 'Rounded'
+  end
 
   t 'type' do
     # nav to textfield
     text('textfields').click
 
     ele = first_textfield
+
+    ele.clear
     ele.type 'ok'
     ele.text.must_equal 'ok'
   end
